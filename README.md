@@ -1,4 +1,4 @@
-# Basic-HTTPs-Client and HTTPs-Server setup and establish a SSL communication.
+# Basic HTTPs-Client and HTTPs-Server setup with Self-Signed Certificate.
 This repository helps in setting up a basic HTTPs Client and enabling a HTTPs Server and establishing the communication between then using a self-signed certificates.
 
 # Issue Faced during the setup 
