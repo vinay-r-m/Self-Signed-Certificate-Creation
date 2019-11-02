@@ -21,7 +21,7 @@ Create a certificate for the HTTPs server and get it digitally signed with the c
 
 * Create a certificate signing request 
 ```
-  openssl req -new -key ca-private.key -out https-server.csr
+  openssl req -new -key https-server.key -out https-server.csr
 ```
 
 * Create a conf file to generate the public certificate for the HTTPs Server. 
@@ -55,18 +55,48 @@ Create a certificate for the HTTPs server and get it digitally signed with the c
   openssl x509 -req -extensions ext -in https-server.csr -CA ca-public.crt -CAkey ca-private.key -CAcreateserial -out https-server-public.crt  -days 500 -extfile openssl.cnf
 ```
 
+# Step 3 : Enabling HTTPs connector in the Tomcat Server.
 
-# Step 3 : Enabling HTTPs connectors in the Tomcat.
+* Below are the list of certificate and key files required on the server for enabling https connector.
+  *  https-server-public.crt
+  *  https-server-private.key
+  
+* Add the below connector to the $TOMCAT-HOME/conf/server.xml of your tomcat.
+> **_NOTE:_**  Having placed the https-server-public.crt and https-server-private.key in the /root/certificate directory the SSLCertificateFile and SSLCertificateKeyFile attributes are configured as shown below.
 
+```
+        <Connector protocol="org.apache.coyote.http11.Http11Protocol"
+                port="8443" maxThreads="200" scheme="https" secure="true" SSLEnabled="true"
+                SSLCertificateFile="/root/certificate/https-server-public.crt"
+                SSLCertificateKeyFile="/root/certificate/https-server-private.key"
+                SSLVerifyClient="optional" SSLProtocol="TLSv1+TLSv1.1+TLSv1.2" />
+```
+> **_NOTE:_** * Once the change are done restart the tomcat server
+* Once the tomcat server is up, check if the certificate is loaded correctly. 
+* The below command should list the DNS names provided during the certificate generation.
+```
+   openssl s_client -connect 172.16.233.163:8443 |  openssl x509 -noout -text | grep DNS:
 
+```
 
+# Step 4 : HTTPs Client side configuration.
+* Below are the list of certificates required on the client for establishing a successful SSL connection.
+  *  ca-public.crt 
+* Add the CA public certificate to the JVM truststore to authorise the SSL certificate recieved from the HTTPs Server.
+```
+   keytool -importcert -alias SELF_CERITIFICATE_AUTHORITY -keystore  '$JAVA-HOME\jre\lib\security\cacerts' -storepass changeit -file '/root/certificate/ca-public.crt'
+```
 
 # Issue Faced during the setup 
 * *java.security.cert.CertificateException: No subject alternative names matching IP address x.x.x.x found.*
 * *java.security.NoSuchAlgorithmException*
+* *SignatureException: Signature length not correct*
+
 ## Solutions 
-### How to resolve java.security.cert.CertificateException in the right way ?
+### How to resolve java.security.cert.CertificateException: No subject alternative names matching IP address x.x.x.x found.* in the right way ?
 
 
 ### How to resolve java.security.NoSuchAlgorithmException ?
+
+### How to resolve RSA SignatureException: Signature length not correct?
 
