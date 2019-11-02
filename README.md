@@ -94,9 +94,25 @@ Create a certificate for the HTTPs server and get it digitally signed with the c
 
 ## Solutions 
 ### How to resolve java.security.cert.CertificateException: No subject alternative names matching IP address x.x.x.x found.* in the right way ?
-
+* This error is seen on the HTTPS Client, when the Client tries to establish a SSL connection with server using a hostname which is not part of the DNS names in the server's public certificate.
+#### Fix1
+* Either disable host verification in the HTTPs Client by adding below code snippet to your connection object in java
+```
+  			((HttpsURLConnection)con).setHostnameVerifier((urlHostName, session) -> {
+				return true;
+			});
+      
+```
+#### Fix2
+* Identify the DNS available in the server certificate and modify the url to use the hostname in the server certificate.
+#### Fix3
+* If its self signed certificate then ensure to recreate the server certificate and include the IP/hostname through which the client is  communicating.
 
 ### How to resolve java.security.NoSuchAlgorithmException ?
+* This error is seen when the algorithm supported by the server is not supported by the client.
+* Ensure the client uses the same JDK version as the server or get the java security provider from the server and add the same in the client java code.
 
 ### How to resolve RSA SignatureException: Signature length not correct?
+* recheck if the server certificate was regenerated with the same server private key.
+
 
